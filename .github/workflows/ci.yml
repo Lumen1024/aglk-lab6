@@ -56,4 +56,11 @@ jobs:
 
       - name: Test
         working-directory: build
-        run: ctest --output-on-failure -C Release
+        run: ctest --output-on-failure -C Release --output-junit test-report.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.os }}
+          path: build/test-report.xml
