@@ -41,12 +41,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('CMakeLists.txt', 'src/**', 'tests/**') }}
+          key: ${{ runner.os }}-ccache-${{ hashFiles('CMakeLists.txt', 'src/**', 'tests/**', '.github/workflows/ci.yml') }}
           restore-keys: |
             ${{ runner.os }}-ccache-
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
 
       - name: Build
         run: cmake --build build --parallel --config Release
