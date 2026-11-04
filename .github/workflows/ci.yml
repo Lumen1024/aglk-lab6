@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+
 jobs:
   build:
     name: Build and test (${{ matrix.os }})
@@ -22,21 +25,34 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++
+          sudo apt-get install -y cmake g++ ccache
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install cmake
+        run: brew install cmake ccache
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y --no-progress
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y --no-progress
+          choco install ccache -y --no-progress
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('CMakeLists.txt', 'src/**', 'tests/**') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
         run: cmake --build build --parallel --config Release
+
+      - name: Ccache stats
+        run: ccache --show-stats
 
       - name: Test
         working-directory: build
