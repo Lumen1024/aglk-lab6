@@ -1,5 +1,7 @@
 #include "converter.hpp"
 
+// Изменение одного файла для проверки кэша CI.
+
 #include <algorithm>
 #include <cctype>
 #include <fstream>
